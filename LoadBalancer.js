@@ -29,13 +29,16 @@ export default class LoadBalancer {
     if (this.indice > this.max) {
       this.indice = 0;
     }
-    if (this.arraypesos[this.indice] != 0){
+    if (this.arraypesos[this.indice] > 0){
       this.siguiente = this.indice;
-      this.arraypesos[this.indice]--;
+      this.arraypesos[this.siguiente]--;
       this.indice++;
     }
     else{
       this.indice++;
+      if (Math.max(...this.arraypesos) === 0){
+      this.arraypesos = [this.servers[0].power, this.servers[1].power, this.servers[2].power, this.servers[3].power];
+    }
     }
     // Envía la petición al servidor y devuelve su respuesta al cliente.
     const server = this.servers[this.siguiente]
