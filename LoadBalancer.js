@@ -13,10 +13,10 @@ export default class LoadBalancer {
     // }
     // Los datos son de solo lectura y se actualizan durante la simulación.
     this.indice = 0;
+    this.indicemin = 0;
     this.max = servers.length - 1;
     this.servers = Object.freeze([...servers]);
-    this.arraypesos = [this.servers[0].power, this.servers[1].power, this.servers[2].power, this.servers[3].power];
-    this.siguiente = 1;
+    this.siguiente = 0;
   }
   
   async onRequestArrival(request, sendToServer) {
@@ -25,23 +25,15 @@ export default class LoadBalancer {
     //   id: "request-17",
     //   payload: "08319462", // Datos que envía el cliente
     //   work: 4              // Unidades de trabajo necesarias
-    // }
-    if (this.indice > this.max) {
-      this.indice = 0;
+    //
+    for (this.indice = 0; this.indice <= this.max; this.indice++) {
+      if (this.servers[this.indice].queuedRequests.length < this.servers[this.indicemin].queuedRequests.length) {
+        this.indicemin = this.indice;
+      }
     }
-    if (this.arraypesos[this.indice] > 0){
-      this.siguiente = this.indice;
-      this.arraypesos[this.siguiente]--;
-      this.indice++;
-    }
-    else{
-      this.indice++;
-      if (Math.max(...this.arraypesos) === 0){
-      this.arraypesos = [this.servers[0].power, this.servers[1].power, this.servers[2].power, this.servers[3].power];
-    }
-    }
+    const server = this.servers[this.indicemin];
+
     // Envía la petición al servidor y devuelve su respuesta al cliente.
-    const server = this.servers[this.siguiente]
     return sendToServer(server.id);
   }
 }
